@@ -1,0 +1,42 @@
+
+@startuml
+
+package "GraphQL Schema" {
+    [Input Schema] - [GraphQL Schema] 
+}
+
+package "Introspection JSON Convertor" {
+    [GraphQL Schema] --> [GraphQL Introspection JSON Convertor] : GraphQL Schema is converted\ninto Introspection JSON format
+}
+
+package "CSharp Code Generator" {
+    [handlebars] --> [GraphQL Codegen CSharp Template]
+    [GraphQL Introspection JSON Convertor] --> [GraphQL Code Generator] : GraphQL Code Generator will\nload the introspection JSON
+    [GraphQL Codegen CSharp Template] --> [GraphQL Code Generator]: GraphQL Code Generator \nloads the CSharp Template
+    [GraphQL Code Generator] -->  [CSharp Library] : GraphQL code Generator generates \nthe CSharp code as the output file\nbased on the JSON and template
+    [GraphQL Code Generator] -->  [gRPC Stubs] : GraphQL code Generator generates\n gRPC Stubs in C#
+}
+  
+package "GraphQL Dotnet Resolver" {
+    [GraphQL-Dotnet Package] - [GraphQL Dotnet Resolver] 
+    [Dependency Injection] -->  [GraphQL Dotnet Resolver]
+}
+
+package "Microservices" {
+    [Microservice] -->  [Dependency Injection] : RPC calls will be made from Microservice\n to GraphQL Dotnet Resolver based\n on dependency injection
+    [gRPC Connector] --> [GraphQL Dotnet Resolver]
+    [Microservice] - [gRPC Connector]
+}
+
+database "Database" {
+    [Provider Directory] --> [GraphQL Dotnet Resolver]
+}
+
+
+[CSharp Library] <--> [GraphQL Dotnet Resolver] : Resolvers will be written\nfor the generated class library
+
+package "Web API" {
+   [GraphQL Dotnet Resolver] --> [API]: Web API will query the resolver\n and data is fetched as the result.
+}
+ [gRPC Stubs] -->  [Microservice]
+@enduml

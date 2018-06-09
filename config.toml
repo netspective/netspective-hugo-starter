@@ -1,0 +1,18 @@
+baseURL = "/"
+languageCode = "en-US"
+defaultContentLanguage = "en"
+
+title = "Netspective Strategy & Planning"
+theme = "netspective"
+metaDataFormat = "yaml"
+defaultContentLanguageInSubdir = true
+
+[params]
+  themeVariant = "netspective"
+  description = "Strategy and Planning"
+  author = "Mathieu Cornic"
+  showVisitedLinks = true
+
+[outputs]
+home = [ "HTML", "RSS", "JSON"]
+

@@ -1,0 +1,3 @@
+[submodule "themes/netspective"]
+	path = themes/netspective
+	url = https://github.com/netspective/hugo-theme-default
