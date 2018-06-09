@@ -6,11 +6,13 @@ MAKEF_PATH = $(shell pwd)
 DEPLOY_PATH = "public"
 DIAGRAMS_SRC_PATH = "$(MAKEF_PATH)/content"
 DIAGRAMS_DEST_PATH = "$(MAKEF_PATH)/static/img/generated/diagrams"
+MASTER_MAKEFILE_URL = "https://raw.githubusercontent.com/netspective/netspective-hugo-starter/master/Makefile"
 PLANTUML_JAR_URL = "https://sourceforge.net/projects/plantuml/files/plantuml.jar/download"
 PLANTUML_JAR = plantuml.jar
 THEME_NAME = netspective
 THEME_PATH = themes/$(THEME_NAME)
 
+SHELL := /bin/bash
 MAKEFLAGS := --silent
 
 all: test
@@ -21,11 +23,18 @@ build: generate-diagrams
 check-theme:
 	cd $(THEME_PATH) && \
 	git fetch && \
-	git log --pretty=oneline
+	git status
 
 update-theme:
 	cd $(THEME_PATH) && \
-	git submodule update --remote --merge
+	git checkout master && \
+	git pull
+
+check-makefile:
+	diff --side-by-side --suppress-common-lines Makefile <(curl -s $(MASTER_MAKEFILE_URL)) || echo "Makefile is different, run 'make update-makefile' to get the latest version."
+
+update-makefile:
+	curl -sSfL $(MASTER_MAKEFILE_URL) -o Makefile
 
 test:
 	hugo server --bind=127.0.0.1 --baseUrl="localhost" --buildDrafts
