@@ -17,6 +17,8 @@ PLANTUML_EXT = .plantuml
 THEME_NAME = netspective
 THEME_PATH = themes/$(THEME_NAME)
 
+GRAPHVIZ_DOT_INSTALLED := $(shell command -v dot 2> /dev/null)
+
 ifneq ("$(wildcard $(DIAGRAMS_SRC_PATH)/*$(PLANTUML_EXT))","")
 HAVE_DIAGRAMS = TRUE
 else
@@ -104,10 +106,16 @@ $(PLANTUML_JAR):
 clean-diagrams:
 	printf "Cleaned ${GREEN}$(DIAGRAMS_DEST_REL_PATH)${RESET}, entries removed: " && rm -rfv $(DIAGRAMS_DEST_PATH) | wc -l
 
+## See if Graphviz dot is installed
+check-graphviz-dot:
+ifndef GRAPHVIZ_DOT_INSTALLED
+    $(error "dot command is not available, please install graphviz.")
+endif
+
 ifeq ("$(HAVE_DIAGRAMS)", "TRUE")
 .ONESHELL:
 ## Generate PlantUML diagrams anywhere in the content area and place them into a common images folder
-generate-diagrams: $(PLANTUML_JAR) clean-diagrams
+generate-diagrams: check-graphviz-dot $(PLANTUML_JAR) clean-diagrams
 	mkdir -p $(DIAGRAMS_DEST_PATH)
 	printf "PlantUML Diagrams\n" > $(DIAGRAMS_DEST_PATH)/README.md
 	printf "=================\n" >> $(DIAGRAMS_DEST_PATH)/README.md
