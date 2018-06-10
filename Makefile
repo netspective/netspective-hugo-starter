@@ -55,9 +55,11 @@ update-theme:
 check-makefile:
 	diff --side-by-side --suppress-common-lines Makefile <(curl -s $(MASTER_MAKEFILE_URL)) || echo "${YELLOW}Makefile is different${RESET}, run '${GREEN}make update-makefile${RESET}' to get the latest version."
 
-## Update this Makefile to the latest version in the starter repo $(MASTER_MAKEFILE_URL)
+.ONESHELL:
+## Update this Makefile to version in the starter repo $(MASTER_MAKEFILE_URL) and commit
 update-makefile:
 	curl -sSfL $(MASTER_MAKEFILE_URL) -o Makefile
+	git commit Makefile -m "Updated to match latest at $(MASTER_MAKEFILE_URL)"
 
 ## Run the Hugo server in development mode
 test: generate-diagrams
