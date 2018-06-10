@@ -80,6 +80,12 @@ update-makefile:
 	curl -sSfL $(MASTER_MAKEFILE_URL) -o Makefile
 	git commit Makefile -m "Updated to match latest at $(MASTER_MAKEFILE_URL)"
 
+## See if Makefile and themes have been updated at their source locations
+check-dependencies: check-makefile check-theme 
+
+## Update Makefile and theme dependencies from their source locations
+update-dependencies: update-makefile update-theme
+
 ## Run the Hugo server in development mode
 test: generate-diagrams
 	hugo server --bind=127.0.0.1 --baseUrl="localhost" --buildDrafts
