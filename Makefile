@@ -108,6 +108,7 @@ diagrams-usage:
 	printf "${RESET}\n"
 	printf "Diagram Destination Usage:${YELLOW}\n"
 	find $(DIAGRAMS_SRC_REL_PATH) -name "*.md" -exec grep -nHo -e '$(DIAGRAMS_DEST_SEARCH_REF).*.*\..*' {} \;	
+	printf "${RESET}"
 
 TARGET_MAX_CHAR_NUM=20
 ## All targets should have a ## Help text above the target and they'll be automatically collected
