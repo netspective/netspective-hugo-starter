@@ -1,4 +1,5 @@
 # 
+# TODO -- add targets to deploy on web server (NGINX, etc.)
 # TODO -- check out https://gist.github.com/bowmanjd/d1687aa3ed921608c343 for automating Sass builds, Javascript bundling, minification, etc. 
 # TODO -- make .plantuml generation smarter by only generating if source file is newer (right now we brute-force generate all of them), similar to https://gist.github.com/hjst/4f2f2c2ca9bd550e50c7f06cb17775b2
 
@@ -59,13 +60,13 @@ update-makefile:
 	curl -sSfL $(MASTER_MAKEFILE_URL) -o Makefile
 
 ## Run the Hugo server in development mode
-test:
+test: generate-diagrams
 	hugo server --bind=127.0.0.1 --baseUrl="localhost" --buildDrafts
 
 ## Remove all unversioned files
 clean: clean-diagrams
-	printf "Cleaned ${GREEN}$(PLANTUML_JAR)${RESET}: " && rm -rfv $(PLANTUML_JAR) | wc -l
-	printf "Cleaned ${GREEN}$(DEPLOY_PATH)${RESET}: " && rm -rfv $(DEPLOY_PATH) | wc -l
+	printf "Cleaned ${GREEN}$(PLANTUML_JAR)${RESET}, entries removed: " && rm -rfv $(PLANTUML_JAR) | wc -l
+	printf "Cleaned ${GREEN}$(DEPLOY_PATH)${RESET}, entries removed: " && rm -rfv $(DEPLOY_PATH) | wc -l
 
 ## Download the latest version of the plantuml.jar file from source location
 $(PLANTUML_JAR):
@@ -74,7 +75,7 @@ $(PLANTUML_JAR):
 
 ## Remove generated PlantUML diagrams
 clean-diagrams:
-	printf "Cleaned ${GREEN}`realpath --relative-to=$(MAKEF_PATH) $(DIAGRAMS_DEST_PATH)`${RESET}: " && rm -rfv $(DIAGRAMS_DEST_PATH) | wc -l
+	printf "Cleaned ${GREEN}`realpath --relative-to=$(MAKEF_PATH) $(DIAGRAMS_DEST_PATH)`${RESET}, entries removed: " && rm -rfv $(DIAGRAMS_DEST_PATH) | wc -l
 
 .ONESHELL:
 ## Generate PlantUML diagrams anywhere in the content area and place them into a common images folder
