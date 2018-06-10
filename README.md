@@ -1,7 +1,12 @@
-Created on May 21, 2018 to manage Netspective Strategy & Planning websites
+Created on June 10, 2018 to manage Netspective's Hugo based web sites
 
-To run in test mode (local Hugo server):
+Use the Makefile for operating this repo, check all targets:
 
+    make help
+
+To run in test mode (local Hugo server), both of the following are equivalent:
+
+    make
     make test
 
 When PlantUML diagrams change (anytime *.plantuml files are updated):
