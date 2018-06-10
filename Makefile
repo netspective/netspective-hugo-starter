@@ -4,12 +4,16 @@
 # TODO -- make .plantuml generation smarter by only generating if source file is newer (right now we brute-force generate all of them), similar to https://gist.github.com/hjst/4f2f2c2ca9bd550e50c7f06cb17775b2
 
 MAKEF_PATH = $(shell pwd)
-DEPLOY_PATH = "public"
-DIAGRAMS_SRC_PATH = "$(MAKEF_PATH)/content"
+DEPLOY_PATH = public
+DIAGRAMS_SRC_PATH = $(MAKEF_PATH)/content
+DIAGRAMS_SRC_REL_PATH = `realpath --relative-to=$(MAKEF_PATH) $(DIAGRAMS_SRC_PATH)`
 DIAGRAMS_DEST_PATH = "$(MAKEF_PATH)/static/img/generated/diagrams"
-MASTER_MAKEFILE_URL = "https://raw.githubusercontent.com/netspective/netspective-hugo-starter/master/Makefile"
-PLANTUML_JAR_URL = "https://sourceforge.net/projects/plantuml/files/plantuml.jar/download"
+DIAGRAMS_DEST_SEARCH_REF = img/generated/diagrams
+DIAGRAMS_DEST_REL_PATH = `realpath --relative-to=$(MAKEF_PATH) $(DIAGRAMS_DEST_PATH)`
+MASTER_MAKEFILE_URL = https://raw.githubusercontent.com/netspective/netspective-hugo-starter/master/Makefile
+PLANTUML_JAR_URL = https://sourceforge.net/projects/plantuml/files/plantuml.jar/download
 PLANTUML_JAR = plantuml.jar
+PLANTUML_EXT = .plantuml
 THEME_NAME = netspective
 THEME_PATH = themes/$(THEME_NAME)
 
@@ -77,7 +81,7 @@ $(PLANTUML_JAR):
 
 ## Remove generated PlantUML diagrams
 clean-diagrams:
-	printf "Cleaned ${GREEN}`realpath --relative-to=$(MAKEF_PATH) $(DIAGRAMS_DEST_PATH)`${RESET}, entries removed: " && rm -rfv $(DIAGRAMS_DEST_PATH) | wc -l
+	printf "Cleaned ${GREEN}$(DIAGRAMS_DEST_REL_PATH)${RESET}, entries removed: " && rm -rfv $(DIAGRAMS_DEST_PATH) | wc -l
 
 .ONESHELL:
 ## Generate PlantUML diagrams anywhere in the content area and place them into a common images folder
@@ -86,12 +90,24 @@ generate-diagrams: $(PLANTUML_JAR) clean-diagrams
 	printf "PlantUML Diagrams\n" > $(DIAGRAMS_DEST_PATH)/README.md
 	printf "=================\n" >> $(DIAGRAMS_DEST_PATH)/README.md
 	printf "_This directory was generated on **`date`** and may be deleted before re-generating files_.\n\n" >> $(DIAGRAMS_DEST_PATH)/README.md
-	printf "Generated PlantUML diagrams from `realpath --relative-to=$(MAKEF_PATH) $(DIAGRAMS_SRC_PATH)`/*.plantuml recursively.\n" >> $(DIAGRAMS_DEST_PATH)/README.md
-	java -jar $(PLANTUML_JAR) -recurse -v -o $(DIAGRAMS_DEST_PATH) "$(DIAGRAMS_SRC_PATH)/*.plantuml" 2>> $(DIAGRAMS_DEST_PATH)/README.md
+	printf "Generated PlantUML diagrams from $(DIAGRAMS_SRC_REL_PATH)/*$(PLANTUML_EXT) recursively.\n" >> $(DIAGRAMS_DEST_PATH)/README.md
+	java -jar $(PLANTUML_JAR) -recurse -v -o $(DIAGRAMS_DEST_PATH) "$(DIAGRAMS_SRC_PATH)/*$(PLANTUML_EXT)" 2>> $(DIAGRAMS_DEST_PATH)/README.md
 	printf "Diagrams generated: ${YELLOW}"
 	cat $(DIAGRAMS_DEST_PATH)/README.md | awk '/Creating file:/ { ++count } END { print count }' 
-	printf "${RESET}Log: ${GREEN}`realpath --relative-to=$(MAKEF_PATH) $(DIAGRAMS_DEST_PATH)`/README.md${RESET}\n"
+	printf "${RESET}Log: ${GREEN}$(DIAGRAMS_DEST_REL_PATH)/README.md${RESET}\n"
 	git status $(DIAGRAMS_DEST_PATH)
+
+.ONESHELL:
+## Displays list of files that are referencing diagrams
+diagrams-usage:
+	printf "Diagram Sources:${YELLOW}\n"
+	find $(DIAGRAMS_SRC_REL_PATH) -name "*$(PLANTUML_EXT)" -exec echo {} \;
+	printf "${RESET}\n"
+	printf "Diagram Shortcode Usage:${YELLOW}\n"
+	find $(DIAGRAMS_SRC_REL_PATH) -name "*.md" -exec grep -nHo -e '{{.*plantuml.*}}' {} \;
+	printf "${RESET}\n"
+	printf "Diagram Destination Usage:${YELLOW}\n"
+	find $(DIAGRAMS_SRC_REL_PATH) -name "*.md" -exec grep -nHo -e '$(DIAGRAMS_DEST_SEARCH_REF).*.*\..*' {} \;	
 
 TARGET_MAX_CHAR_NUM=20
 ## All targets should have a ## Help text above the target and they'll be automatically collected
