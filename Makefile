@@ -5,11 +5,16 @@
 
 MAKEF_PATH = $(shell pwd)
 DEPLOY_PATH = public
-DIAGRAMS_SRC_PATH = $(MAKEF_PATH)/content
-DIAGRAMS_SRC_REL_PATH = `realpath --relative-to=$(MAKEF_PATH) $(DIAGRAMS_SRC_PATH)`
-DIAGRAMS_DEST_PATH = "$(MAKEF_PATH)/static/img/generated/diagrams"
+DIAGRAMS_SRC_REL_PATH = content
+DIAGRAMS_SRC_PATH = $(MAKEF_PATH)/$(DIAGRAMS_SRC_REL_PATH)
+DIAGRAMS_DEST_REL_PATH = static/img/generated/diagrams
+DIAGRAMS_DEST_PATH = $(MAKEF_PATH)/$(DIAGRAMS_DEST_REL_PATH)
 DIAGRAMS_DEST_SEARCH_REF = img/generated/diagrams
-DIAGRAMS_DEST_REL_PATH = `realpath --relative-to=$(MAKEF_PATH) $(DIAGRAMS_DEST_PATH)`
+DOCUMENTS_DEST_REL_PATH = static/docs/generated
+DOCUMENTS_DEST_PATH = $(MAKEF_PATH)/$(DOCUMENTS_DEST_REL_PATH)
+GRAPHDOC_SRC_PATH = content
+GRAPHDOC_DEST_REL_PATH = $(DOCUMENTS_DEST_REL_PATH)/graphdoc
+GRAPHDOC_DEST_PATH = $(MAKEF_PATH)/$(GRAPHDOC_DEST_REL_PATH)
 MASTER_MAKEFILE_URL = https://raw.githubusercontent.com/netspective/netspective-hugo-starter/master/Makefile
 PLANTUML_JAR_URL = https://sourceforge.net/projects/plantuml/files/plantuml.jar/download
 PLANTUML_JAR = plantuml.jar
@@ -17,9 +22,16 @@ PLANTUML_EXT = .plantuml
 THEME_NAME = netspective
 THEME_PATH = themes/$(THEME_NAME)
 
-GRAPHVIZ_DOT_INSTALLED := $(shell command -v dot 2> /dev/null)
+TREE_INSTALLED := $(shell command -v tree 2> /dev/null)
+ifndef TREE_INSTALLED
+	$(error "tree command not available, please install it")
+endif
 
-ifneq ("$(wildcard $(DIAGRAMS_SRC_PATH)/*$(PLANTUML_EXT))","")
+GRAPHVIZ_DOT_INSTALLED := $(shell command -v dot 2> /dev/null)
+NPM_INSTALLED := $(shell command -v npm 2> /dev/null)
+GRAPHDOC_INSTALLED := $(shell command -v graphdoc 2> /dev/null)
+
+ifneq ($(shell find $(DIAGRAMS_SRC_PATH) -name "*$(PLANTUML_EXT)" -exec echo {} \;),"")
 HAVE_DIAGRAMS = TRUE
 else
 HAVE_DIAGRAMS = FALSE
@@ -93,7 +105,7 @@ test: generate-diagrams
 	hugo server --bind=127.0.0.1 --baseUrl="localhost" --buildDrafts
 
 ## Remove all unversioned files
-clean: clean-diagrams
+clean: clean-diagrams clean-graphdoc
 	printf "Cleaned ${GREEN}$(PLANTUML_JAR)${RESET}, entries removed: " && rm -rfv $(PLANTUML_JAR) | wc -l
 	printf "Cleaned ${GREEN}$(DEPLOY_PATH)${RESET}, entries removed: " && rm -rfv $(DEPLOY_PATH) | wc -l
 
@@ -109,7 +121,7 @@ clean-diagrams:
 ## See if Graphviz dot is installed
 check-graphviz-dot:
 ifndef GRAPHVIZ_DOT_INSTALLED
-    $(error "dot command is not available, please install graphviz.")
+	echo "dot command is not available, please install graphviz."
 endif
 
 ifeq ("$(HAVE_DIAGRAMS)", "TRUE")
@@ -147,6 +159,31 @@ diagrams-usage:
 	echo "No ${GREEN}*$(PLANTUML_EXT)${RESET} diagrams exist in ${GREEN}$(DIAGRAMS_SRC_REL_PATH)${RESET}, ignoring ${YELLOW}$@${RESET} target."
 endif
 
+check-npm:
+ifndef NPM_INSTALLED
+	echo "Node package manager npm is not available, please install NodeJS."
+endif
+
+check-graphdoc: check-npm
+ifndef GRAPHDOC_INSTALLED
+	echo "GraphQL documentation generator not available, install: ${GREEN}npm install -g @2fd/graphdoc${RESET}"
+endif
+
+## Remove generated GraphQL documentation files
+clean-graphdoc:
+	printf "Cleaned ${GREEN}$(GRAPHDOC_DEST_PATH)${RESET}, entries removed: " && rm -rfv $(GRAPHDOC_DEST_PATH) | wc -l
+
+.ONESHELL:
+## Generate GraphQL schema documents for all available GraphQL *.gql schema files
+generate-graphql-schema-docs: check-graphdoc clean-graphdoc
+	mkdir -p $(GRAPHDOC_DEST_PATH)
+	find $(GRAPHDOC_SRC_PATH) -name "*.gql" -exec graphdoc -s {} -o $(GRAPHDOC_DEST_PATH)/{} --force &>> $(GRAPHDOC_DEST_PATH)/graphdoc.log \;
+	echo "Check ${GREEN}$(GRAPHDOC_DEST_PATH)/graphdoc.log${RESET}."
+	tree -d $(GRAPHDOC_DEST_PATH)
+
+## Generate all static documents (e.g. GraphQL schema documents)
+generate-documents: generate-graphql-schema-docs
+
 TARGET_MAX_CHAR_NUM=20
 ## All targets should have a ## Help text above the target and they'll be automatically collected
 ## Show help, using auto generator from https://gist.github.com/prwhite/8168133
@@ -168,11 +205,17 @@ help:
 	@echo ''
 	@echo 'Directives:'
 	@echo "  ${YELLOW}HAVE_DIAGRAMS${RESET}            '${GREEN}$(HAVE_DIAGRAMS)${RESET}'"
-	@echo "  ${YELLOW}DIAGRAMS_SRC_PATH${RESET}        '${GREEN}$(DIAGRAMS_SRC_PATH)${RESET}'"
 	@echo "  ${YELLOW}DIAGRAMS_SRC_REL_PATH${RESET}    '${GREEN}$(DIAGRAMS_SRC_REL_PATH)${RESET}'"
+	@echo "  ${YELLOW}DIAGRAMS_SRC_PATH${RESET}        '${GREEN}$(DIAGRAMS_SRC_PATH)${RESET}'"
+	@echo "  ${YELLOW}DIAGRAMS_DEST_REL_PATH${RESET}   '${GREEN}$(DIAGRAMS_DEST_REL_PATH)${RESET}'"
 	@echo "  ${YELLOW}DIAGRAMS_DEST_PATH${RESET}       '${GREEN}$(DIAGRAMS_DEST_PATH)${RESET}'"
 	@echo "  ${YELLOW}DIAGRAMS_DEST_SEARCH_REF${RESET} '${GREEN}$(DIAGRAMS_DEST_SEARCH_REF)${RESET}'"
-	@echo "  ${YELLOW}DIAGRAMS_DEST_REL_PATH${RESET}   '${GREEN}$(DIAGRAMS_DEST_REL_PATH)${RESET}'"
+	@echo ''
+	@echo "  ${YELLOW}DOCUMENTS_DEST_REL_PATH${RESET} '${GREEN}$(DOCUMENTS_DEST_REL_PATH)${RESET}'"
+	@echo "  ${YELLOW}DOCUMENTS_DEST_PATH${RESET}     '${GREEN}$(DOCUMENTS_DEST_PATH)${RESET}'"
+	@echo "  ${YELLOW}GRAPHDOC_SRC_PATH${RESET}       '${GREEN}$(GRAPHDOC_SRC_PATH)${RESET}'"
+	@echo "  ${YELLOW}GRAPHDOC_DEST_REL_PATH${RESET}  '${GREEN}$(GRAPHDOC_DEST_REL_PATH)${RESET}'"
+	@echo "  ${YELLOW}GRAPHDOC_DEST_PATH${RESET}      '${GREEN}$(GRAPHDOC_DEST_PATH)${RESET}'"
 	@echo ''
 	@echo "  ${YELLOW}MASTER_MAKEFILE_URL${RESET} '${GREEN}$(MASTER_MAKEFILE_URL)${RESET}'"
 	@echo "  ${YELLOW}PLANTUML_JAR_URL${RESET}    '${GREEN}$(PLANTUML_JAR_URL)${RESET}'"
