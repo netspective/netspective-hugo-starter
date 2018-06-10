@@ -1,6 +1,6 @@
 # 
 # TODO -- check out https://gist.github.com/bowmanjd/d1687aa3ed921608c343 for automating Sass builds, Javascript bundling, minification, etc. 
-# TODO -- make .plantuml generation smarter by only generating if source file is newer (right now we brute-force generate all of them)
+# TODO -- make .plantuml generation smarter by only generating if source file is newer (right now we brute-force generate all of them), similar to https://gist.github.com/hjst/4f2f2c2ca9bd550e50c7f06cb17775b2
 
 MAKEF_PATH = $(shell pwd)
 DEPLOY_PATH = "public"
