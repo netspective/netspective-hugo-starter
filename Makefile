@@ -17,12 +17,27 @@ PLANTUML_EXT = .plantuml
 THEME_NAME = netspective
 THEME_PATH = themes/$(THEME_NAME)
 
+ifneq ("$(wildcard $(DIAGRAMS_SRC_PATH)/*$(PLANTUML_EXT))","")
+HAVE_DIAGRAMS = TRUE
+else
+HAVE_DIAGRAMS = FALSE
+endif
+
 SHELL := /bin/bash
 MAKEFLAGS := --silent
 GREEN  := $(shell tput -Txterm setaf 2)
 YELLOW := $(shell tput -Txterm setaf 3)
 WHITE  := $(shell tput -Txterm setaf 7)
 RESET  := $(shell tput -Txterm sgr0)
+ifeq (Windows_NT,$(OS))
+OS_NAME := Windows
+OS_CPU  := $(call _lower,$(PROCESSOR_ARCHITECTURE))
+OS_ARCH := $(if $(findstring amd64,$(OS_CPU)),x86_64,i686)
+else
+OS_NAME := $(shell uname -s)
+OS_ARCH := $(shell uname -m)
+OS_CPU  := $(if $(findstring 64,$(OS_ARCH)),amd64,x86)
+endif
 
 ## Default is to run this in development mode for testing the website
 default: test
@@ -83,6 +98,7 @@ $(PLANTUML_JAR):
 clean-diagrams:
 	printf "Cleaned ${GREEN}$(DIAGRAMS_DEST_REL_PATH)${RESET}, entries removed: " && rm -rfv $(DIAGRAMS_DEST_PATH) | wc -l
 
+ifeq ("$(HAVE_DIAGRAMS)", "TRUE")
 .ONESHELL:
 ## Generate PlantUML diagrams anywhere in the content area and place them into a common images folder
 generate-diagrams: $(PLANTUML_JAR) clean-diagrams
@@ -109,6 +125,13 @@ diagrams-usage:
 	printf "Diagram Destination Usage:${YELLOW}\n"
 	find $(DIAGRAMS_SRC_REL_PATH) -name "*.md" -exec grep -nHo -e '$(DIAGRAMS_DEST_SEARCH_REF).*.*\..*' {} \;	
 	printf "${RESET}"
+else
+generate-diagrams: clean-diagrams
+	echo "No ${GREEN}*$(PLANTUML_EXT)${RESET} diagrams exist in ${GREEN}$(DIAGRAMS_SRC_REL_PATH)${RESET}, ignoring ${YELLOW}$@${RESET} target."
+
+diagrams-usage:
+	echo "No ${GREEN}*$(PLANTUML_EXT)${RESET} diagrams exist in ${GREEN}$(DIAGRAMS_SRC_REL_PATH)${RESET}, ignoring ${YELLOW}$@${RESET} target."
+endif
 
 TARGET_MAX_CHAR_NUM=20
 ## All targets should have a ## Help text above the target and they'll be automatically collected
@@ -128,5 +151,11 @@ help:
 		} \
 	} \
 	{ lastLine = $$0 }' $(MAKEFILE_LIST)
+	@echo ''
+	@echo 'Directives:'
+	@echo "  ${YELLOW}HAVE_DIAGRAMS${RESET} '${GREEN}$(HAVE_DIAGRAMS)${RESET}'"
+	@echo "  ${YELLOW}OS_NAME${RESET}       '${GREEN}$(OS_NAME)${RESET}'"
+	@echo "  ${YELLOW}OS_CPU${RESET}        '${GREEN}$(OS_CPU)${RESET}'"
+	@echo "  ${YELLOW}OS_ARCH${RESET}       '${GREEN}$(OS_ARCH)${RESET}'"
 
 .PHONY: $(PLANTUML_JAR) help
