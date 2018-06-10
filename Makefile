@@ -133,7 +133,7 @@ generate-diagrams: check-graphviz-dot $(PLANTUML_JAR) clean-diagrams
 	printf "=================\n" >> $(DIAGRAMS_DEST_PATH)/README.md
 	printf "_This directory was generated on **`date`** and may be deleted before re-generating files_.\n\n" >> $(DIAGRAMS_DEST_PATH)/README.md
 	printf "Generated PlantUML diagrams from $(DIAGRAMS_SRC_REL_PATH)/*$(PLANTUML_EXT) recursively.\n" >> $(DIAGRAMS_DEST_PATH)/README.md
-	java -jar $(PLANTUML_JAR) -recurse -v -o $(DIAGRAMS_DEST_PATH) "$(DIAGRAMS_SRC_PATH)/*$(PLANTUML_EXT)" 2>> $(DIAGRAMS_DEST_PATH)/README.md
+	java -jar $(PLANTUML_JAR) -recurse -v -o $(DIAGRAMS_DEST_PATH) "$(DIAGRAMS_SRC_PATH)/**/*$(PLANTUML_EXT)" 2>> $(DIAGRAMS_DEST_PATH)/README.md
 	printf "Diagrams generated: ${YELLOW}"
 	cat $(DIAGRAMS_DEST_PATH)/README.md | awk '/Creating file:/ { ++count } END { print count }' 
 	printf "${RESET}Log: ${GREEN}$(DIAGRAMS_DEST_REL_PATH)/README.md${RESET}\n"
