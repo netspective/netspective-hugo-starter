@@ -57,7 +57,7 @@ endif
 default: test
 
 ## Generate diagrams and package the site so that it's ready to deploy on a static web server
-build: generate-diagrams
+build: generate-all
 	hugo
 
 .ONESHELL:
@@ -185,6 +185,9 @@ generate-graphql-schema-docs: check-graphdoc clean-graphdoc
 
 ## Generate all static documents (e.g. GraphQL schema documents)
 generate-documents: generate-graphql-schema-docs
+
+## Generate all diagrams, documents, etc. for the entire project
+generate-all: generate-diagrams generate-documents
 
 TARGET_MAX_CHAR_NUM=20
 ## All targets should have a ## Help text above the target and they'll be automatically collected
