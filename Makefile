@@ -101,7 +101,7 @@ check-dependencies: check-makefile check-theme
 update-dependencies: update-makefile update-theme
 
 ## Run the Hugo server in development mode
-test: generate-diagrams
+test:
 	hugo server --bind=127.0.0.1 --baseUrl="localhost" --buildDrafts
 
 ## Remove all unversioned files
@@ -148,7 +148,7 @@ diagrams-usage:
 	printf "Diagram Shortcode Usage:${YELLOW}\n"
 	find $(DIAGRAMS_SRC_REL_PATH) -name "*.md" -exec grep -nHo -e '{{.*plantuml.*}}' {} \;
 	printf "${RESET}\n"
-	printf "Diagram Destination Usage:${YELLOW}\n"
+	printf "Diagram Destination Usage (should be empty, use shortcode):${YELLOW}\n"
 	find $(DIAGRAMS_SRC_REL_PATH) -name "*.md" -exec grep -nHo -e '$(DIAGRAMS_DEST_SEARCH_REF).*.*\..*' {} \;	
 	printf "${RESET}"
 else
