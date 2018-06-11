@@ -4,7 +4,7 @@
 # TODO -- make .plantuml generation smarter by only generating if source file is newer (right now we brute-force generate all of them), similar to https://gist.github.com/hjst/4f2f2c2ca9bd550e50c7f06cb17775b2
 
 MAKEF_PATH = $(shell pwd)
-DEPLOY_PATH = public
+BUILD_PATH = public
 DIAGRAMS_SRC_REL_PATH = content
 DIAGRAMS_SRC_PATH = $(MAKEF_PATH)/$(DIAGRAMS_SRC_REL_PATH)
 DIAGRAMS_DEST_REL_PATH = static/img/generated/diagrams
@@ -107,7 +107,7 @@ test:
 ## Remove all unversioned files
 clean: clean-diagrams clean-graphdoc
 	printf "Cleaned ${GREEN}$(PLANTUML_JAR)${RESET}, entries removed: " && rm -rfv $(PLANTUML_JAR) | wc -l
-	printf "Cleaned ${GREEN}$(DEPLOY_PATH)${RESET}, entries removed: " && rm -rfv $(DEPLOY_PATH) | wc -l
+	printf "Cleaned ${GREEN}$(BUILD_PATH)${RESET}, entries removed: " && rm -rfv $(BUILD_PATH) | wc -l
 	printf "Pruned empty directories, entries removed: " && find . -type d -empty -exec echo {} \; | wc -l
 	find . -type d -empty -delete
 
