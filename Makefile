@@ -171,7 +171,7 @@ endif
 
 ## Remove generated GraphQL documentation files
 clean-graphdoc:
-	printf "Cleaned ${GREEN}$(GRAPHDOC_DEST_PATH)${RESET}, entries removed: " && rm -rfv $(GRAPHDOC_DEST_PATH) | wc -l
+	printf "Cleaned ${GREEN}$(GRAPHDOC_DEST_REL_PATH)${RESET}, entries removed: " && rm -rfv $(GRAPHDOC_DEST_PATH) | wc -l
 
 .ONESHELL:
 ## Generate GraphQL schema documents for all available GraphQL *.gql schema files
