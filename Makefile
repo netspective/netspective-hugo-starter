@@ -108,7 +108,8 @@ test:
 clean: clean-diagrams clean-graphdoc
 	printf "Cleaned ${GREEN}$(PLANTUML_JAR)${RESET}, entries removed: " && rm -rfv $(PLANTUML_JAR) | wc -l
 	printf "Cleaned ${GREEN}$(DEPLOY_PATH)${RESET}, entries removed: " && rm -rfv $(DEPLOY_PATH) | wc -l
-
+	find . -type d -empty -delete
+	
 ## Download the latest version of the plantuml.jar file from source location
 $(PLANTUML_JAR):
 	@# --content-disposition tells wget to get $(PLANTUML_JAR_URL) and download it to $(PLANTUML_JAR)
