@@ -1,6 +1,10 @@
 Created on June 10, 2018 to manage Netspective's Hugo based web sites
 
-Theme was added using
+To start:
+
+    git clone --recursive https://github.com/netspective/netspective-hugo-starter.git (new site name)
+    
+NOTE: Theme was added using
 
     mkdir themes
     cd themes
