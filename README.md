@@ -3,8 +3,14 @@ Created on June 10, 2018 to manage Netspective's Hugo based web sites
 To start:
 
     git clone --recursive https://github.com/netspective/netspective-hugo-starter.git (new site name)
-    
-NOTE: Theme was added using
+
+Then, for custom branding for each site:
+
+* Add a new logo  with name "main-masthead-logo-for-dark-bg.png" in static/images/branding
+* Add updated CSS in static\css (name given is theme-custom.css)
+* update themeVariant = "custom" in config.toml
+
+NOTE: Theme was added using the following, but shouldn't be required for each site
 
     mkdir themes
     cd themes
